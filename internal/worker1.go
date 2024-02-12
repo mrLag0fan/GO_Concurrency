@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"fmt"
@@ -17,7 +17,7 @@ func (user User) String() string {
 
 var count = 0
 
-func generate(duration time.Duration, channel chan User, wg *sync.WaitGroup) {
+func Generate(duration time.Duration, channel chan User, wg *sync.WaitGroup) {
 	for timeout := time.After(duration); ; {
 		select {
 		case channel <- User{

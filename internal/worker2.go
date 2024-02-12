@@ -1,12 +1,14 @@
-package main
+package internal
 
 import (
+	"GO_Concurrency/pkg/database"
+	"GO_Concurrency/pkg/errors"
 	"fmt"
 	"sync"
 	"time"
 )
 
-func worker2(period time.Duration, numGoroutines int, channel chan User, wg *sync.WaitGroup) {
+func Worker2(period time.Duration, numGoroutines int, channel chan User, wg *sync.WaitGroup) {
 	defer wg.Done()
 	uptimeTicker := time.NewTicker(period)
 	var dataSlice []User
@@ -39,16 +41,16 @@ func post(dataSlice []User, numGoroutines int) {
 
 		go func(startIndex int64) {
 			defer goroutineWG.Done()
-			tx, err := db.Begin()
+			tx, err := database.DB.Begin()
 			endIndex := startIndex + int64(recordsPerGoroutine)
 			for j := startIndex; j < endIndex; j++ {
-				_, err = tx.Exec(`INSERT INTO "user"."user" VALUES ($1, $2)`,
+				_, err = tx.Exec(`INSERT INTO "go_user" VALUES ($1, $2)`,
 					dataSlice[j].Name,
 					dataSlice[j].Comment)
-				CheckError(err)
+				errors.CheckError(err)
 			}
 			err = tx.Commit()
-			CheckError(err)
+			errors.CheckError(err)
 		}(int64(i * recordsPerGoroutine))
 
 	}
